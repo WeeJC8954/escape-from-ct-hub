@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Escape from CT Hub</title>
+  <meta name="description" content="Run, walk or wait? Which bus gets you home, and is rain coming.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚌</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Escape from CT Hub</h1>
+      <p class="sub" id="where">Locating you…</p>
+    </header>
+
+    <section id="verdict" class="card verdict" aria-live="polite">
+      <p class="muted">Finding your bus home…</p>
+    </section>
+
+    <section id="options" class="card" hidden>
+      <h2>Other options</h2>
+      <ol id="option-list"></ol>
+    </section>
+
+    <form id="manual" class="card" hidden>
+      <label for="manual-input">Location unavailable — enter a postal code or bus stop code</label>
+      <div class="row">
+        <input id="manual-input" inputmode="numeric" pattern="\d{5,6}" maxlength="6" placeholder="e.g. 520201 or 75009" required>
+        <button type="submit">Go</button>
+      </div>
+      <p id="manual-error" class="error" hidden></p>
+    </form>
+
+    <section id="weather" class="card">
+      <h2>Weather</h2>
+      <dl class="weather-grid">
+        <div><dt>Next 2 h</dt><dd id="w-forecast">—</dd></div>
+        <div><dt>Rain now</dt><dd id="w-rain">—</dd></div>
+        <div><dt>Temp</dt><dd id="w-temp">—</dd></div>
+        <div><dt>UV</dt><dd id="w-uv">—</dd></div>
+        <div><dt>PM2.5</dt><dd id="w-pm25">—</dd></div>
+      </dl>
+    </section>
+
+    <footer>
+      <p>Updated <span id="updated">—</span> · <button id="refresh" type="button" class="link">Refresh</button></p>
+      <p class="muted">Data: arrivelah &amp; busrouter.sg (LTA DataMall), OneMap, data.gov.sg (NEA). Direct buses only.</p>
+    </footer>
+  </main>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
