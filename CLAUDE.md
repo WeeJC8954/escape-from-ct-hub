@@ -9,7 +9,7 @@ Static web app: from the user's GPS location, pick the direct bus home (postal 5
 
 ## Architecture
 
-- `src/geo.js`, `src/routing.js`, `src/weather.js`, `src/decision.js`, `src/refresh.js`: **pure** logic. Data in, data out.
+- `src/geo.js`, `src/routing.js`, `src/weather.js`, `src/decision.js`, `src/refresh.js`, `src/theme.js`: **pure** logic. Data in, data out.
 - `src/api.js`: every network call lives here, plus the 24 h `localStorage` cache for static busrouter data.
 - `src/app.js`: the only file that touches the DOM. Handles geolocation, orchestration, rendering and the 30 s refresh. Every await in `refresh()` is followed by an `isCurrent()` check so older runs never render.
 - `src/config.js`: every tunable constant (home, radii, speeds, refresh). Don't hard-code these elsewhere.
@@ -21,6 +21,8 @@ Static web app: from the user's GPS location, pick the direct bus home (postal 5
 - Render API-sourced text with `textContent` / `el()`, never `innerHTML`.
 - New logic gets a test in `test/*.test.js` with small hand-written fixtures, written first (TDD). Tests never hit live APIs. Stub `globalThis.fetch` / `globalThis.localStorage` as `test/api.test.js` does.
 - One data source failing must not break the page. Degrade that panel to "—" or a message.
+
+- Theming: colour tokens live on `:root`. Dark values apply under `prefers-color-scheme: dark` (unless `data-theme="light"`) and under `:root[data-theme="dark"]`. Keep both blocks in sync. The inline `<head>` script must stay in step with `THEME_KEY`.
 
 ## Data quirks
 

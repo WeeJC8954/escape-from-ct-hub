@@ -13,6 +13,7 @@
 5. Gives a verdict, **WALK**, **RUN** or **WAIT**, ranked by estimated time to get home.
 6. Checks the NEA 2-hour forecast and live rainfall nearest to you, and adjusts the advice ("RUN — rain is coming, catch this one").
 7. Shows a weather strip: forecast, rain now, air temperature, UV index, PM2.5.
+8. Has a theme button (🌓 Auto → ☀️ Light → 🌙 Dark). Auto follows your device setting, and your choice is remembered.
 
 The page refreshes every 30 seconds while it is open.
 
@@ -76,6 +77,7 @@ src/routing.js      direct-service finder
 src/weather.js      forecast / rainfall / temperature / UV / PM2.5 helpers
 src/decision.js     WALK / RUN / WAIT verdict and ranking
 src/refresh.js      refresh sequencing + last-known GPS fallback
+src/theme.js        Auto / Light / Dark theme cycling
 src/api.js          fetch wrappers + 24 h localStorage cache
 src/app.js          geolocation, orchestration, rendering
 test/               node:test unit tests
