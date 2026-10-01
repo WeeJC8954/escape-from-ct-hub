@@ -1,0 +1,11 @@
+export const HOME_POSTAL = '542268';
+export const HOME_FALLBACK = { lat: 1.384456, lng: 103.896253 };
+export const ORIGIN_RADIUS_M = 500;
+export const HOME_RADIUS_M = 400;
+export const DETOUR = 1.3;
+export const WALK_M_PER_MIN = 80;
+export const RUN_M_PER_MIN = 200;
+export const MIN_PER_STOP = 2;
+export const REFRESH_MS = 30_000;
+export const MAX_ARRIVAL_STOPS = 6;
+export const STATIC_CACHE_MS = 24 * 60 * 60 * 1000;

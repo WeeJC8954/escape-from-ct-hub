@@ -1,0 +1,11 @@
+{
+  "name": "escape-from-ct-hub",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Run, walk or wait? Bus-home helper for Singapore using arrivelah, busrouter.sg and data.gov.sg.",
+  "scripts": {
+    "test": "node --test",
+    "start": "npx --yes serve ."
+  }
+}
