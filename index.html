@@ -6,12 +6,22 @@
   <title>Escape from CT Hub</title>
   <meta name="description" content="Run, walk or wait? Which bus gets you home, and is rain coming.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚌</text></svg>">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    try {
+      const t = localStorage.getItem('theme');
+      if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    } catch {}
+  </script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main>
     <header>
-      <h1>Escape from CT Hub</h1>
+      <div class="top">
+        <h1>Escape from CT Hub</h1>
+        <button id="theme" type="button" class="theme" aria-label="Change colour theme">🌓 Auto</button>
+      </div>
       <p class="sub" id="where">Locating you…</p>
     </header>
 
