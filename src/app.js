@@ -1,5 +1,6 @@
 import { HOME_POSTAL, HOME_FALLBACK, REFRESH_MS, MAX_ARRIVAL_STOPS, GPS_FALLBACK_MS } from './config.js';
 import { createSequencer, resolveOrigin } from './refresh.js';
+import { THEME_KEY, nextTheme, normalizeTheme, themeLabel } from './theme.js';
 import { parseStops, findDirectOptions } from './routing.js';
 import { getStopsRaw, getServices, getArrivals, geocodePostal, getWeather } from './api.js';
 import { forecastFor, isWetForecast, stationReading, uvNow, pm25For } from './weather.js';
@@ -172,6 +173,31 @@ $('manual').addEventListener('submit', async (e) => {
   refresh();
 });
 
+function readTheme() {
+  try {
+    return normalizeTheme(localStorage.getItem(THEME_KEY));
+  } catch {
+    return 'auto';
+  }
+}
+
+function applyTheme(theme) {
+  if (theme === 'auto') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+  $('theme').textContent = themeLabel(theme);
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch {
+    // Storage blocked: the choice lasts for this page view only.
+  }
+}
+
+let theme = readTheme();
+applyTheme(theme);
+$('theme').addEventListener('click', () => {
+  theme = nextTheme(theme);
+  applyTheme(theme);
+});
 $('refresh').addEventListener('click', () => refresh());
 
 refresh();
