@@ -9,9 +9,9 @@ Static web app: from the user's GPS location, pick the direct bus home (postal 5
 
 ## Architecture
 
-- `src/geo.js`, `src/routing.js`, `src/weather.js`, `src/decision.js`: **pure** logic. Data in, data out.
+- `src/geo.js`, `src/routing.js`, `src/weather.js`, `src/decision.js`, `src/refresh.js`: **pure** logic. Data in, data out.
 - `src/api.js`: every network call lives here, plus the 24 h `localStorage` cache for static busrouter data.
-- `src/app.js`: the only file that touches the DOM. Handles geolocation, orchestration, rendering and the 30 s refresh.
+- `src/app.js`: the only file that touches the DOM. Handles geolocation, orchestration, rendering and the 30 s refresh. Every await in `refresh()` is followed by an `isCurrent()` check so older runs never render.
 - `src/config.js`: every tunable constant (home, radii, speeds, refresh). Don't hard-code these elsewhere.
 
 ## Conventions
