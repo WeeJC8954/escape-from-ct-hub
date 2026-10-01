@@ -43,11 +43,15 @@ test('rankOptions computes totals and sorts by total time home', () => {
   assert.equal(ranked[0].verdict, 'WALK');
 });
 
-test('WAIT total uses max(walk, eta2) when the second bus is also before walk time', () => {
+test('WAIT catches the second bus when it is reachable; total is eta + ride', () => {
   const c = { service: '27', boardStop: { code: 'S1', distM: 400 }, stopsCount: 1 }; // walk 6.5, run 2.6
   const [o] = rankOptions([c], { S1: arrival('27', 60000, 180000) }); // eta1 1, eta2 3
   assert.equal(o.verdict, 'WAIT');
-  assert.equal(o.totalMin, 6.5 + 2);
+  assert.equal(o.totalMin, 3 + 2);
+});
+
+test('decide: null when the second bus is also unreachable even running', () => {
+  assert.equal(decide({ walk: 6.5, run: 2.6, eta1: 0.5, eta2: 2 }), null);
 });
 
 test('adviceFor reflects rain', () => {

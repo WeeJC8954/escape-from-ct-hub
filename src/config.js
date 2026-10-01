@@ -9,3 +9,5 @@ export const MIN_PER_STOP = 2;
 export const REFRESH_MS = 30_000;
 export const MAX_ARRIVAL_STOPS = 6;
 export const STATIC_CACHE_MS = 24 * 60 * 60 * 1000;
+export const FETCH_TIMEOUT_MS = 8000;
+export const GPS_FALLBACK_MS = 2 * 60 * 1000;

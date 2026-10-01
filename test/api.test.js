@@ -46,3 +46,10 @@ test('geocodePostal returns lat/lng or null', async () => {
   globalThis.fetch = failFetch;
   assert.equal(await geocodePostal('542268'), null);
 });
+
+test('getJson aborts a hanging request after the timeout', async () => {
+  globalThis.fetch = (url, opts) =>
+    new Promise((_, reject) => opts?.signal?.addEventListener('abort', () => reject(opts.signal.reason)));
+  const { getJson } = await import('../src/api.js');
+  await assert.rejects(getJson('http://hang', 20));
+});

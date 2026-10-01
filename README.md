@@ -28,9 +28,9 @@ For each candidate (service + boarding stop):
 
 - **WALK** if the next bus arrives at or after your walking time.
 - **RUN** if only running gets you there in time.
-- **WAIT** for the following bus if even running misses it.
+- **WAIT** for the following bus if even running misses it (only if you can reach that one).
 
-Options are ranked by `max(walk, wait) + ride`. Rain changes the message: wet forecast or rain falling turns "Walk" into "Walk briskly", and "Run" into "RUN — rain is coming". If you'll have to wait while it's raining, it tells you to stay sheltered.
+Options are ranked by `bus arrival + ride`. Rain changes the message: wet forecast or rain falling turns "Walk" into "Walk briskly", and "Run" into "RUN — rain is coming". If you'll have to wait while it's raining, it tells you to stay sheltered.
 
 ## Data sources
 

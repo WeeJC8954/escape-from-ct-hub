@@ -1,12 +1,12 @@
-import { STATIC_CACHE_MS } from './config.js';
+import { STATIC_CACHE_MS, FETCH_TIMEOUT_MS } from './config.js';
 
 const BUSROUTER = 'https://data.busrouter.sg/v1';
 const ARRIVELAH = 'https://arrivelah2.busrouter.sg/';
 const ONEMAP = 'https://www.onemap.gov.sg/api/common/elastic/search';
 const DATAGOV = 'https://api.data.gov.sg/v1/environment';
 
-async function getJson(url) {
-  const res = await fetch(url);
+export async function getJson(url, timeoutMs = FETCH_TIMEOUT_MS) {
+  const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
   return res.json();
 }

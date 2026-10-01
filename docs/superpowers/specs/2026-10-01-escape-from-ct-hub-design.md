@@ -83,8 +83,8 @@ For each candidate with live arrival data:
 - Choose the bus the user can catch:
   - `eta1 ≥ walk` → **WALK**, catch bus 1.
   - `run ≤ eta1 < walk` → **RUN**, catch bus 1.
-  - else → **WAIT**, catch bus 2 (if `eta2` exists, else "no more buses").
-- `rideMin = stopsCount × 2`; `totalMin = max(walk, etaCaught) + rideMin` (WAIT uses `max(walk, eta2)`).
+  - else → **WAIT**, catch bus 2 if it is reachable (`eta2 ≥ run`); otherwise drop the option.
+- `rideMin = stopsCount × 2`; `totalMin = etaCaught + rideMin` (the caught bus is always reachable, so you board when it arrives).
 - Rank options by `totalMin`; best = first.
 
 Rain modifier (applied to the best option's message), `wet = isWetForecast || raining`:

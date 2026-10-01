@@ -1,11 +1,12 @@
-import { HOME_POSTAL, HOME_FALLBACK, REFRESH_MS, MAX_ARRIVAL_STOPS } from './config.js';
+import { HOME_POSTAL, HOME_FALLBACK, REFRESH_MS, MAX_ARRIVAL_STOPS, GPS_FALLBACK_MS } from './config.js';
+import { createSequencer, resolveOrigin } from './refresh.js';
 import { parseStops, findDirectOptions } from './routing.js';
 import { getStopsRaw, getServices, getArrivals, geocodePostal, getWeather } from './api.js';
 import { forecastFor, isWetForecast, stationReading, uvNow, pm25For } from './weather.js';
 import { rankOptions, adviceFor } from './decision.js';
 
 const $ = (id) => document.getElementById(id);
-const state = { stops: null, services: null, home: null, manualOrigin: null, timer: null };
+const state = { stops: null, services: null, home: null, manualOrigin: null, lastGps: null, running: false, seq: createSequencer(), timer: null };
 
 function el(tag, props = {}, ...children) {
   const node = document.createElement(tag);
@@ -24,7 +25,7 @@ function getGps() {
     navigator.geolocation.getCurrentPosition(
       (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
       reject,
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 15000 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
     );
   });
 }
@@ -87,25 +88,45 @@ function renderOthers(others) {
   );
 }
 
+async function locate(token) {
+  if (state.manualOrigin) return state.manualOrigin;
+  let fix = null;
+  try {
+    fix = await getGps();
+    state.lastGps = { origin: fix, t: Date.now() };
+  } catch {
+    // Fall through to the last known fix.
+  }
+  if (!state.seq.isCurrent(token)) return null;
+  const resolved = resolveOrigin(fix, state.lastGps, Date.now(), GPS_FALLBACK_MS);
+  if (!resolved) {
+    $('manual').hidden = false;
+    $('where').textContent = 'Location unavailable';
+    renderMessage('Enter a postal code or bus stop code below.');
+    return null;
+  }
+  const { lat, lng } = resolved.origin;
+  $('where').textContent = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}${resolved.stale ? ' (last known)' : ''}`;
+  return resolved.origin;
+}
+
 async function refresh() {
+  const token = state.seq.next();
+  const isCurrent = () => state.seq.isCurrent(token);
+  state.running = true;
   try {
     await loadStatic();
-    let origin = state.manualOrigin;
-    if (!origin) {
-      try {
-        origin = await getGps();
-        $('where').textContent = `📍 ${origin.lat.toFixed(5)}, ${origin.lng.toFixed(5)}`;
-      } catch {
-        $('manual').hidden = false;
-        $('where').textContent = 'Location unavailable';
-        renderMessage('Enter a postal code or bus stop code below.');
-        return;
-      }
-    }
+    if (!isCurrent()) return;
+    const origin = await locate(token);
+    if (!origin || !isCurrent()) return;
 
     const weatherPromise = getWeather();
     const route = findDirectOptions(origin, state.home, state.stops, state.services);
-    const rain = renderWeather(origin, await weatherPromise);
+    const codes = [...new Set(route.options.map((o) => o.boardStop.code))].slice(0, MAX_ARRIVAL_STOPS);
+    const arrivalsPromise = Promise.allSettled(codes.map((c) => getArrivals(c)));
+    const weather = await weatherPromise;
+    if (!isCurrent()) return;
+    const rain = renderWeather(origin, weather);
 
     if (route.atHome) return renderMessage("You're home already 🏠");
     if (route.options.length === 0) {
@@ -113,8 +134,8 @@ async function refresh() {
       return renderMessage('No direct bus home from here.', route.nearbyStops.length ? list : el('p', { className: 'muted' }, 'No bus stops within 500 m.'));
     }
 
-    const codes = [...new Set(route.options.map((o) => o.boardStop.code))].slice(0, MAX_ARRIVAL_STOPS);
-    const settled = await Promise.allSettled(codes.map((c) => getArrivals(c)));
+    const settled = await arrivalsPromise;
+    if (!isCurrent()) return;
     const arrivalsByStop = Object.fromEntries(codes.map((c, i) => [c, settled[i].status === 'fulfilled' ? settled[i].value : null]));
     const ranked = rankOptions(route.options.filter((o) => codes.includes(o.boardStop.code)), arrivalsByStop);
 
@@ -123,9 +144,12 @@ async function refresh() {
     renderOthers(ranked.slice(1, 4));
   } catch (err) {
     console.error(err);
-    renderMessage('Something went wrong loading bus data. Check your connection and refresh.');
+    if (isCurrent()) renderMessage('Something went wrong loading bus data. Check your connection and refresh.');
   } finally {
-    $('updated').textContent = new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    if (isCurrent()) {
+      state.running = false;
+      $('updated').textContent = new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
   }
 }
 
@@ -152,5 +176,8 @@ $('refresh').addEventListener('click', () => refresh());
 
 refresh();
 state.timer = setInterval(() => {
-  if (!document.hidden) refresh();
+  if (!document.hidden && !state.running) refresh();
 }, REFRESH_MS);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) refresh();
+});

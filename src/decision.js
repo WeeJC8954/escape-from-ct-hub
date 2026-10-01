@@ -13,7 +13,7 @@ export function decide({ walk, run, eta1, eta2 }) {
   if (eta1 == null) return null;
   if (eta1 >= walk) return { verdict: 'WALK', etaCaught: eta1 };
   if (eta1 >= run) return { verdict: 'RUN', etaCaught: eta1 };
-  if (eta2 == null) return null;
+  if (eta2 == null || eta2 < run) return null;
   return { verdict: 'WAIT', etaCaught: eta2 };
 }
 
@@ -27,7 +27,7 @@ export function rankOptions(candidates, arrivalsByStop) {
     const d = decide({ walk, run, ...etas });
     if (!d) continue;
     const rideMin = c.stopsCount * MIN_PER_STOP;
-    ranked.push({ ...c, ...etas, walk, run, ...d, rideMin, totalMin: Math.max(walk, d.etaCaught) + rideMin });
+    ranked.push({ ...c, ...etas, walk, run, ...d, rideMin, totalMin: d.etaCaught + rideMin });
   }
   return ranked.sort((a, b) => a.totalMin - b.totalMin);
 }
